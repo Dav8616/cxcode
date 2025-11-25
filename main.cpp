@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
 
     while (running)
     {
+        editor_draw(&ed);
         while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_QUIT)
@@ -57,7 +58,6 @@ int main(int argc, char *argv[])
                     editor_handle_key(&ed, key, ctrl);
                 }
                 mouse_update(&ed.mouse);
-                editor_draw(&ed);
             }
         }
         mouse_update(&ed.mouse);   // updates ed.mouse.x/y/down/click
