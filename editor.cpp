@@ -666,3 +666,91 @@ void handle_theme_editor_input(Editor *ed, int key)
     }
 }
 
+// Handles mouse clicks for menu interaction and cursor placement
+void editor_handle_click(Editor *ed, int x, int y)
+{
+    // --- Zone 1: Menu Bar (Top 12 pixels) ---
+    if (y < 12)
+    {
+        int item_width = 40;
+        MenuType new_menu = MENU_NONE;
+        
+        // Determine which header was clicked
+        if (x < item_width) new_menu = MENU_FILE;
+        else if (x < item_width * 2) new_menu = MENU_EDIT;
+        else if (x < item_width * 3) new_menu = MENU_VIEW;
+        else if (x < item_width * 4) new_menu = MENU_HELP;
+        
+        if (new_menu != MENU_NONE) {
+            if (new_menu == ed->active_menu) {
+                // Clicked the currently active header -> Close it
+                ed->active_menu = MENU_NONE;
+            } else {
+                // Clicked a different or closed header -> Open/Switch to it
+                ed->active_menu = new_menu;
+                ed->menu_selection = 0; // Reset selection
+            }
+        } else {
+            // Clicked outside a menu header range, close any open menu
+            ed->active_menu = MENU_NONE;
+        }
+    }
+
+    // --- Zone 2: Dropdown Menu Area (Starts at y=12) ---
+    else if (ed->active_menu != MENU_NONE && ed->mode == MODE_EDIT)
+    {
+        // A menu is open, check if the click is inside the dropdown box
+        int max_items = 0;
+        int menu_x_start = 0;
+        
+        // Get the dimensions and start position of the active dropdown
+        switch (ed->active_menu)
+        {
+            case MENU_FILE: max_items = 5; menu_x_start = 0; break;
+            case MENU_EDIT: max_items = 5; menu_x_start = 40; break;
+            case MENU_VIEW: max_items = 3; menu_x_start = 80; break;
+            case MENU_HELP: max_items = 2; menu_x_start = 120; break;
+            default: ed->active_menu = MENU_NONE; return;
+        }
+
+        // Dropdown menu properties (Assumed MAX_MENU_WIDTH is 100)
+        int dropdown_height = max_items * 8; // FONT_HEIGHT is 8
+        int dropdown_width = 100;
+
+        if (y < 12 + dropdown_height && x >= menu_x_start && x < menu_x_start + dropdown_width)
+        {
+            // Click is inside the active dropdown area
+            int relative_y = y - 12;
+            int selection = relative_y / 8; 
+            
+            if (selection >= 0 && selection < max_items)
+            {
+                ed->menu_selection = selection;
+                handle_menu_action(ed); // Execute the selected action
+            }
+        }
+        
+        // If execution didn't happen (i.e., clicked outside the valid item area
+        // but still within the dropdown region), or if an action was executed, close the menu.
+        ed->active_menu = MENU_NONE;
+    }
+
+    // --- Zone 3: Text Editing Area (No Menu Open) ---
+    else if (ed->mode == MODE_EDIT) 
+    {
+        // Handle cursor placement
+        int line = (y - 12) / 8 + ed->scroll_y;
+        
+        // Calculate the column offset based on whether line numbers are visible
+        // (Assuming line numbers take up 24px + 2px padding = 26px)
+        int start_x = ed->show_line_numbers ? 26 : 2;
+        int col = (x - start_x) / 6; // FONT_WIDTH is 6
+
+        if (line >= 0 && line < ed->line_count)
+        {
+            ed->cursor_y = line;
+            ed->cursor_x = col;
+            clamp_cursor(ed);
+        }
+    }
+}

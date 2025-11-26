@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
 
     int running = 1;
     SDL_Event event;
+    int prev_click = 0;
 
     editor_draw(&ed);
 
@@ -60,7 +61,16 @@ int main(int argc, char *argv[])
                 mouse_update(&ed.mouse);
             }
         }
-        mouse_update(&ed.mouse);   // updates ed.mouse.x/y/down/click
+        mouse_update(&ed.mouse); // updates ed.mouse.x/y/down/click
+
+        if (ed.mouse.click && !prev_click)
+        {
+            // Call the new centralized handler function from editor.cpp
+            editor_handle_click(&ed, ed.mouse.x, ed.mouse.y);
+        }
+
+        // Store the current click state for the next iteration
+        prev_click = ed.mouse.click;
 
         SDL_Delay(20);
     }

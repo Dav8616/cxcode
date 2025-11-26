@@ -1,77 +1,23 @@
 #include "mouse.h"
 #include <SDL/SDL.h>
 #include "editor.h"
+
+// No need to know about UI or specific editor logic here anymore
+// void ui_click(Editor *ed, int x, int y); 
+
 extern Editor ed;
 extern SDL_Surface* screen; 
-void clamp_cursor(Editor* ed);
-
 
 // Simple arrow cursor
 const uint16_t mouse_cursor[MOUSE_W * MOUSE_H] = {
-    0xFFFF,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0xFFFF,
-    0xFFFF,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0,
-    0,
-    0,
-    0,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0,
-    0,
-    0,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0,
-    0,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
-    0xFFFF,
+    0xFFFF, 0, 0, 0, 0, 0, 0, 0xFFFF,
+    0xFFFF, 0, 0, 0, 0, 0, 0, 0xFFFF,
+    0xFFFF, 0xFFFF, 0, 0, 0, 0, 0, 0xFFFF,
+    0xFFFF, 0xFFFF, 0xFFFF, 0, 0, 0, 0, 0xFFFF,
+    0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0, 0, 0, 0xFFFF,
+    0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0, 0,
+    0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0,
+    0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
 };
 
 void mouse_init(MouseState *m)
@@ -116,19 +62,9 @@ void mouse_update(MouseState *m)
         m->touching = false;
     }
 
+    // PURE INPUT: Just record if the button is pressed.
+    // The logic to decide WHAT was clicked will happen in main.cpp or editor.cpp
     m->click = isKeyPressed(KEY_NSPIRE_CLICK);
-    if (ed.mouse.click)
-    {
-        int line = (ed.mouse.y - 12) / 8 + ed.scroll_y;
-        int col = (ed.mouse.x - (ed.show_line_numbers ? 26 : 2)) / 6;
-
-        if (line >= 0 && line < ed.line_count)
-        {
-            ed.cursor_y = line;
-            ed.cursor_x = col;
-            clamp_cursor(&ed);
-        }
-    }
 }
 
 void mouse_draw(MouseState *m)

@@ -72,5 +72,6 @@ void perform_redo(Editor *ed);
 void copy_selection(Editor *ed);
 void paste_clipboard(Editor *ed);
 void clamp_cursor(Editor *ed);
+void editor_handle_click(Editor *ed, int x, int y);
 
 #endif
